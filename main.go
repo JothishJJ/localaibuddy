@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/generative-ai-go/genai"
 	"github.com/joho/godotenv"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
@@ -29,6 +30,25 @@ func main() {
 
 	model := client.GenerativeModel("gemini-1.5-pro-latest")
 
+	// Safety settings obviouly none
+	model.SafetySettings = []*genai.SafetySetting{
+		{
+			Category:  genai.HarmCategoryHarassment,
+			Threshold: genai.HarmBlockNone,
+		},
+		{
+			Category:  genai.HarmCategoryHateSpeech,
+			Threshold: genai.HarmBlockNone,
+		},
+		{
+			Category:  genai.HarmCategorySexuallyExplicit,
+			Threshold: genai.HarmBlockNone,
+		},
+		{
+			Category:  genai.HarmCategoryDangerousContent,
+			Threshold: genai.HarmBlockNone,
+		},
+	}
 	cs := model.StartChat()
 
 	cs.History = []*genai.Content{
@@ -67,12 +87,19 @@ func main() {
 		}
 
 		message = scanner.Text()
-		resp, err := cs.SendMessage(ctx, genai.Text(message))
-		if err != nil {
-			log.Fatal(err)
+
+		iter := cs.SendMessageStream(ctx, genai.Text(message))
+		fmt.Print("Model: ")
+		for {
+			resp, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			fmt.Printf("%v", resp.Candidates[0].Content.Parts[0])
 		}
-
-		fmt.Printf("Model: %v", resp.Candidates[0].Content.Parts[0])
 	}
-
 }
