@@ -49,6 +49,7 @@ func main() {
 			Threshold: genai.HarmBlockNone,
 		},
 	}
+
 	cs := model.StartChat()
 
 	cs.History = []*genai.Content{
