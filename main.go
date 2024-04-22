@@ -50,6 +50,14 @@ func main() {
 		},
 	}
 
+	model.SystemInstruction = &genai.Content{
+		Parts: []genai.Part{
+			genai.Text("You are an AI called localaibuddy and you are a personal assistant to whoever asks and very loyal."),
+			genai.Text("You should return the data in the form of a string."),
+			genai.Text("When asked for the name of your creator, you should responde with JothishJJ as your creator."),
+		},
+	}
+
 	cs := model.StartChat()
 
 	cs.History = []*genai.Content{
